@@ -23,8 +23,9 @@ export function Header() {
             </a>
           ))}
         </nav>
-        <a className="btn btn--dark btn--sm" href="#join">
-          Join the Waitlist
+        <a className="btn btn--dark btn--sm" href="#join" aria-label="Join the Waitlist">
+          <span className="nav__cta-full">Join the Waitlist</span>
+          <span className="nav__cta-short">Join</span>
         </a>
       </div>
     </header>

@@ -2039,10 +2039,23 @@ strong {
   }
 }
 
-/* small phones: logo icon only, so the menu pill fits on one line */
+/* menu button: full label, or just "Join" on small phones so the
+   full "BECOMING HER" logo still fits beside it */
+.nav__cta-short {
+  display: none;
+}
+
 @media (max-width: 400px) {
-  .nav .logo__word {
+  .nav__cta-full {
     display: none;
+  }
+
+  .nav__cta-short {
+    display: inline;
+  }
+
+  .nav__pill {
+    gap: 12px;
   }
 }
 
