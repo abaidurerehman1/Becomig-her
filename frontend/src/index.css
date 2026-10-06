@@ -1108,6 +1108,10 @@ strong {
 }
 
 /* Manifesto: revealing year list ----------------------------------------- */
+.manifesto {
+  overflow: hidden; /* contains the corner glow below */
+}
+
 .manifesto::before {
   content: '';
   position: absolute;
@@ -1868,15 +1872,13 @@ strong {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* even 2 x 3 grid: every tile one cell, so nothing sits alone */
   .bento__tile,
-  .bento__tile--book {
-    grid-column: span 1;
-    grid-row: auto;
-  }
-
+  .bento__tile--book,
   .bento__tile--live,
   .bento__tile--challenges {
-    grid-column: span 2;
+    grid-column: span 1;
+    grid-row: auto;
   }
 }
 
@@ -1959,6 +1961,7 @@ strong {
   .nav .btn--sm {
     padding-inline: 16px;
     font-size: 11px;
+    white-space: nowrap;
   }
 
   .logo__word {
@@ -2033,6 +2036,13 @@ strong {
     transform: translateY(150%);
     opacity: 0;
     pointer-events: none;
+  }
+}
+
+/* small phones: logo icon only, so the menu pill fits on one line */
+@media (max-width: 400px) {
+  .nav .logo__word {
+    display: none;
   }
 }
 
