@@ -1,0 +1,117 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# never run two deploys at once; let a running deploy finish
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Frontend · lint, typecheck, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build # tsc -b && vite build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: frontend/dist
+          retention-days: 7
+
+  backend:
+    name: Backend · install, compile, import
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python -m compileall -q main.py
+      - name: App imports and routes register
+        env:
+          DATABASE_URL: postgresql://ci@localhost/ci # import only; nothing connects
+        run: python -c "import main; print(len(main.app.routes), 'routes')"
+
+  deploy:
+    name: Deploy to server
+    needs: [frontend, backend]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: release/web
+
+      - name: Package release
+        run: |
+          cp backend/main.py backend/requirements.txt deploy/deploy.sh release/
+          tar -czf release.tgz -C release .
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload and deploy
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+        run: |
+          set -euo pipefail
+          id="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          opts=(-i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o BatchMode=yes)
+          scp "${opts[@]}" -P "$SSH_PORT" release.tgz "$SSH_USER@$SSH_HOST:/tmp/becoming-her-$id.tgz"
+          # secrets travel over stdin only: never on the command line or in logs
+          printf 'DATABASE_URL=%s\nADMIN_TOKEN=%s\nCORS_ORIGINS=%s\n' \
+            "$DATABASE_URL" "$ADMIN_TOKEN" "$CORS_ORIGINS" |
+          ssh "${opts[@]}" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "set -e; d=\$(mktemp -d); tar -xzf /tmp/becoming-her-$id.tgz -C \$d; rm -f /tmp/becoming-her-$id.tgz; bash \$d/deploy.sh $id \$d"
+
+      - name: Smoke test
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          curl -fsS --retry 5 --retry-delay 2 "http://$SSH_HOST:9160/api/health"
+          curl -fsS -o /dev/null "http://$SSH_HOST:9160/"
+          curl -fsS -o /dev/null "http://$SSH_HOST:9160/admin"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
