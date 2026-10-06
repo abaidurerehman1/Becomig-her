@@ -2,13 +2,15 @@ import csv
 import io
 import os
 import secrets
+import time
+from collections import deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 
 import psycopg
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -104,14 +106,38 @@ def waitlist_count():
 # --- Admin -------------------------------------------------------------------
 # Every admin route requires `Authorization: Bearer <ADMIN_TOKEN>`.
 # With no ADMIN_TOKEN configured, the admin API is switched off entirely.
+# Brute-force guard: after MAX_FAILED_LOGINS wrong passwords from one IP within
+# LOCKOUT_SECONDS, that IP is refused until the window passes. In-memory, so it is
+# per worker process and resets on restart — enough to make guessing impractical.
+
+MAX_FAILED_LOGINS = 5
+LOCKOUT_SECONDS = 15 * 60
+_failed_logins: dict[str, deque[float]] = {}
 
 
-def require_admin(authorization: str | None = Header(default=None)) -> None:
+def require_admin(request: Request, authorization: str | None = Header(default=None)) -> None:
     expected = os.getenv("ADMIN_TOKEN", "")
     if not expected:
         raise HTTPException(status_code=503, detail="Admin access is not configured.")
+
+    ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    fails = _failed_logins.get(ip)
+    if fails:
+        while fails and now - fails[0] > LOCKOUT_SECONDS:
+            fails.popleft()
+        if not fails:
+            del _failed_logins[ip]
+        elif len(fails) >= MAX_FAILED_LOGINS:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many wrong passwords. Try again in 15 minutes.",
+                headers={"Retry-After": str(int(LOCKOUT_SECONDS - (now - fails[0])) + 1)},
+            )
+
     scheme, _, token = (authorization or "").partition(" ")
     if scheme.lower() != "bearer" or not secrets.compare_digest(token.encode(), expected.encode()):
+        _failed_logins.setdefault(ip, deque()).append(now)
         raise HTTPException(status_code=401, detail="Invalid admin password.")
 
 
