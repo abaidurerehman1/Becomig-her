@@ -3,6 +3,7 @@ import io
 import os
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Literal
 
 import psycopg
@@ -11,7 +12,9 @@ from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, R
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-load_dotenv()
+# Local dev reads backend/.env. Only that exact file: in production systemd provides the
+# environment, and searching parent directories would hit the owner-only deploy .env.
+load_dotenv(Path(__file__).with_name(".env"))
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
