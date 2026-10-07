@@ -1,5 +1,5 @@
 import { RevealText } from '../components/RevealText'
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 import { WANTS } from '../content'
 
 // Each "want" is drawn as a book spine in the stack.
@@ -11,7 +11,6 @@ export function Problem() {
       <section className="section problem" id="problem" aria-labelledby="problem-title">
         <div className="container problem__grid">
           <div className="problem__head">
-            <Eyebrow>The problem</Eyebrow>
             <h2 className="h2" id="problem-title">
               You probably don’t need <Accent>another book</Accent>.
             </h2>
@@ -46,7 +45,6 @@ export function Problem() {
 
       <section className="statement" aria-label="Why Becoming HER exists">
         <div className="container">
-          <Eyebrow>Why it exists</Eyebrow>
           <RevealText
             className="statement__text"
             text="Becoming HER exists to close the gap between what you learn and how you actually live."

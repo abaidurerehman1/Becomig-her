@@ -221,24 +221,7 @@ strong {
   background: var(--pink-deep);
 }
 
-.section--dark .eyebrow {
-  color: var(--on-dark-muted);
-}
-
-.section--dark .eyebrow::before {
-  background: var(--pink);
-}
-
-.section--pink .eyebrow {
-  color: rgba(97, 3, 21, 0.6);
-}
-
-.section--pink .eyebrow::before {
-  background: var(--ink);
-}
-
 .h2 {
-  margin-top: 16px;
   font-size: clamp(36px, 5.6vw, 68px);
   letter-spacing: -0.005em;
   line-height: 1;
@@ -479,7 +462,7 @@ strong {
 .hero__top {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 32px;
 }
 
@@ -707,14 +690,6 @@ strong {
   position: relative;
 }
 
-.join__panel .eyebrow {
-  color: var(--on-dark-muted);
-}
-
-.join__panel .eyebrow::before {
-  background: var(--pink);
-}
-
 .join__panel .accent {
   color: var(--pink);
 }
@@ -898,18 +873,8 @@ strong {
   color: #fff;
 }
 
-.statement .eyebrow,
-.manifesto .eyebrow {
-  color: var(--on-dark-muted);
-}
-
-.statement .eyebrow::before {
-  background: var(--pink);
-}
-
 .statement__text {
   max-width: 17ch;
-  margin-top: 28px;
   font: 400 clamp(40px, 6.6vw, 100px) / 1.02 var(--font-display);
   letter-spacing: -0.005em;
   text-transform: uppercase;
@@ -1129,7 +1094,6 @@ strong {
 
 .manifesto__title {
   max-width: 12ch;
-  margin-top: 20px;
   font-size: clamp(48px, 7.4vw, 112px);
   font-weight: 800;
   line-height: 0.92;

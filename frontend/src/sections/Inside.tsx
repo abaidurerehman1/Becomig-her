@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 import { FEATURES } from '../content'
 
 type Tile = { className: string; art: ReactNode }
@@ -62,7 +62,6 @@ export function Inside() {
   return (
     <section className="section inside" id="inside" aria-labelledby="inside-title">
       <div className="container">
-        <Eyebrow>Inside</Eyebrow>
         <h2 className="h2" id="inside-title">
           Inside <Accent>Becoming HER</Accent>
         </h2>

@@ -1,12 +1,10 @@
 import { RevealText } from '../components/RevealText'
-import { Eyebrow } from '../components/ui'
 import { A_YEAR_FROM_NOW } from '../content'
 
 export function Manifesto() {
   return (
     <section className="section section--dark manifesto" aria-labelledby="manifesto-title">
       <div className="container">
-        <Eyebrow>The point</Eyebrow>
         <h2 className="manifesto__title" id="manifesto-title">
           This isn’t about finishing <span>more books.</span>
         </h2>

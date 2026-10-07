@@ -1,10 +1,5 @@
 import type { ReactNode } from 'react'
 
-/** Small uppercase label with a pink rule, used above section headings. */
-export function Eyebrow({ children }: { children: ReactNode }) {
-  return <span className="eyebrow">{children}</span>
-}
-
 /** Italic serif accent word inside a display heading. */
 export function Accent({ children }: { children: ReactNode }) {
   return <em className="accent">{children}</em>

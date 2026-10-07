@@ -1,11 +1,10 @@
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 import { FOR_HER } from '../content'
 
 export function ForHer() {
   return (
     <section className="section section--pink for-her" id="for-her" aria-labelledby="for-her-title">
       <div className="container">
-        <Eyebrow>Who it’s for</Eyebrow>
         <h2 className="h2 for-her__title" id="for-her-title">
           This is for the woman <Accent>who...</Accent>
         </h2>
