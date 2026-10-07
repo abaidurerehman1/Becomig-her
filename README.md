@@ -55,8 +55,19 @@ psql -U postgres -p 5433 -d becoming_her -c "SELECT * FROM waitlist ORDER BY cre
    health-checks it and **rolls back automatically** if it doesn't come up. The last 5
    releases are kept. A smoke test then hits the live site.
 
-Production: http://38.97.62.137:9160 (nginx on :9160 → static site + `/api` proxied to
-uvicorn on 127.0.0.1:9161, systemd unit `becoming-her-api`, PostgreSQL 16 database `becoming_her`).
+Production: **https://becomingherformula.com** (admin: https://becomingherformula.com/admin).
+
+```
+visitor → https://becomingherformula.com → network gateway (10.100.0.1, terminates HTTPS)
+        → server :9160 nginx → static site, /api → uvicorn 127.0.0.1:9161 → PostgreSQL 16
+```
+The domain and HTTPS are configured on the gateway, not on this server. nginx redirects any
+request that isn't for `becomingherformula.com` (e.g. `http://38.97.62.137:9160`, `www.`) to
+the HTTPS domain, so the admin password never travels over plain HTTP; `/api/health` is exempt.
+API process: systemd unit `becoming-her-api`; database `becoming_her`.
+
+The nginx site (`deploy/nginx/becoming-her.conf`) is installed by `provision.sh`, not by each
+deploy. After editing it, install it on the server and run `sudo nginx -t && sudo systemctl reload nginx`.
 
 ### GitHub Secrets
 

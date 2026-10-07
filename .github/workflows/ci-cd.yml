@@ -104,13 +104,13 @@ jobs:
           ssh "${opts[@]}" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
             "set -e; d=\$(mktemp -d); tar -xzf /tmp/becoming-her-$id.tgz -C \$d; rm -f /tmp/becoming-her-$id.tgz; bash \$d/deploy.sh $id \$d"
 
-      - name: Smoke test
+      - name: Smoke test (live domain)
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SITE_URL: https://becomingherformula.com
         run: |
-          curl -fsS --retry 5 --retry-delay 2 "http://$SSH_HOST:9160/api/health"
-          curl -fsS -o /dev/null "http://$SSH_HOST:9160/"
-          curl -fsS -o /dev/null "http://$SSH_HOST:9160/admin"
+          curl -fsS --retry 5 --retry-delay 2 "$SITE_URL/api/health"
+          curl -fsS -o /dev/null "$SITE_URL/"
+          curl -fsS -o /dev/null "$SITE_URL/admin"
 
       - name: Remove SSH key
         if: always()
