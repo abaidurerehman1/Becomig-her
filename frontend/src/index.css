@@ -131,6 +131,17 @@ strong {
   color: var(--ink);
 }
 
+/* on the accent pink surfaces the default pink highlight would be invisible */
+.section--pink ::selection,
+.final ::selection,
+.bento__tile--pink ::selection,
+.spine--pink ::selection,
+.use-it ::selection,
+.tile--hero ::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
 :focus-visible {
   outline: 2px solid var(--pink-deep);
   outline-offset: 3px;
