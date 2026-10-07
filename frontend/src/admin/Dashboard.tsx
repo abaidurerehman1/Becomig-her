@@ -116,7 +116,6 @@ export function Dashboard({ token, onSignOut }: { token: string; onSignOut: () =
       <main className="admin-main">
         <div className="admin-head">
           <div>
-            <span className="eyebrow">Waitlist dashboard</span>
             <h1 className="admin-head__title">
               Your <em className="accent">waitlist</em>
             </h1>

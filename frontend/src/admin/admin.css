@@ -168,7 +168,6 @@
 }
 
 .admin-head__title {
-  margin-top: 14px;
   font-size: clamp(40px, 5.4vw, 72px);
   letter-spacing: -0.005em;
 }
