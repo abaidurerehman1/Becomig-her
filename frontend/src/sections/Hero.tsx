@@ -1,14 +1,12 @@
 import { ArrowIcon } from '../components/Icons'
 import { Photo } from '../components/Photo'
 import { RotatingBadge } from '../components/RotatingBadge'
-import { Eyebrow } from '../components/ui'
 
 export function Hero() {
   return (
     <section className="hero" id="top" aria-labelledby="hero-title" data-cta-hide>
       <div className="container container--wide">
         <div className="hero__top">
-          <Eyebrow>Opening soon</Eyebrow>
           <p className="hero__lead">
             A monthly self-development community for women who know they’re made for more.
           </p>

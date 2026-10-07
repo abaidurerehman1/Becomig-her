@@ -1,5 +1,5 @@
 import { WaitlistForm } from '../components/WaitlistForm'
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 import { FOUNDING_PRICE } from '../content'
 
 export function Join() {
@@ -8,7 +8,6 @@ export function Join() {
       <div className="container">
         <div className="join__panel">
           <div className="join__copy">
-            <Eyebrow>The waitlist</Eyebrow>
             <h2 className="h2" id="join-title">
               Join the <Accent>Waitlist</Accent>
             </h2>

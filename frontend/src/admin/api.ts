@@ -48,8 +48,11 @@ export const tokenStore = {
   },
 }
 
-async function request(path: string, token: string): Promise<Response> {
-  const res = await fetch(`/api/admin${path}`, { headers: { Authorization: `Bearer ${token}` } })
+async function request(path: string, token: string, init: RequestInit = {}): Promise<Response> {
+  const res = await fetch(`/api/admin${path}`, {
+    ...init,
+    headers: { Authorization: `Bearer ${token}` },
+  })
   if (res.status === 401) throw new AuthError('Invalid admin password.')
   if (!res.ok) {
     const body = await res.json().catch(() => null)
@@ -81,6 +84,10 @@ export const adminApi = {
         token,
       )
     ).json(),
+  /** Permanently deletes one signup. */
+  deleteSignup: async (token: string, id: number): Promise<void> => {
+    await request(`/signups/${id}`, token, { method: 'DELETE' })
+  },
   /** Downloads the (filtered) list as CSV via an authenticated fetch. */
   async exportCsv(token: string, opts: { q?: string; source?: Source }) {
     const res = await request(`/signups.csv${query({ q: opts.q, source: opts.source })}`, token)

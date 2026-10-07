@@ -1,4 +1,4 @@
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 
 const STEPS = ['We’ll read it together.', 'Talk about it.', 'Question it.']
 
@@ -8,7 +8,6 @@ export function WhatIs() {
       <div className="container">
         <div className="what__head">
           <div>
-            <Eyebrow>What it is</Eyebrow>
             <h2 className="h2" id="what-title">
               What is <Accent>Becoming HER</Accent>?
             </h2>

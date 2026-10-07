@@ -1,6 +1,6 @@
 import { MemberCard } from '../components/MemberCard'
 import { WaitlistForm } from '../components/WaitlistForm'
-import { Accent, Eyebrow } from '../components/ui'
+import { Accent } from '../components/ui'
 
 export function Founding() {
   return (
@@ -9,7 +9,6 @@ export function Founding() {
         <MemberCard />
 
         <div className="founding__copy">
-          <Eyebrow>Founding members</Eyebrow>
           <h2 className="h2" id="founding-title">
             Become a <Accent>Founding Member</Accent>
           </h2>
