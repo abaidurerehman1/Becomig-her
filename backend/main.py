@@ -48,7 +48,7 @@ app = FastAPI(title="Becoming HER Waitlist API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
@@ -237,6 +237,16 @@ def admin_signups(
             for i, n, e, s, c in rows
         ],
     }
+
+
+@admin.delete("/signups/{signup_id}", status_code=204)
+def admin_delete_signup(signup_id: int):
+    """Permanently remove one signup (e.g. spam or a requested removal)."""
+    with connect() as conn:
+        row = conn.execute("DELETE FROM waitlist WHERE id = %s RETURNING id", (signup_id,)).fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Signup not found.")
+    return Response(status_code=204)
 
 
 def _csv_safe(value: str) -> str:

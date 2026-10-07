@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowIcon } from '../components/Icons'
 import { Logo } from '../components/Logo'
-import { adminApi, AuthError, type SignupPage, type Source, type Stats } from './api'
+import { adminApi, AuthError, type Signup, type SignupPage, type Source, type Stats } from './api'
 import { DailyChart } from './DailyChart'
 import { fmtNumber, fmtRelative } from './format'
 import { SignupsTable } from './SignupsTable'
@@ -68,6 +68,18 @@ export function Dashboard({ token, onSignOut }: { token: string; onSignOut: () =
     setQuery(q)
     setPageNo(1)
   }, [])
+
+  async function deleteSignup(s: Signup) {
+    try {
+      await adminApi.deleteSignup(token, s.id)
+    } catch (err) {
+      handle(err)
+      throw err // keep the row's confirm open
+    }
+    // deleting the last row on a page steps back a page; then refresh list + stats
+    if (page && page.items.length === 1 && pageNo > 1) setPageNo(pageNo - 1)
+    setRefreshedAt(Date.now())
+  }
 
   async function exportCsv() {
     setExporting(true)
@@ -209,6 +221,7 @@ export function Dashboard({ token, onSignOut }: { token: string; onSignOut: () =
             setPageNo(1)
           }}
           onPage={setPageNo}
+          onDelete={deleteSignup}
         />
       </main>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { TrashIcon } from '../components/Icons'
 import type { Signup, SignupPage, Source } from './api'
 import { fmtDateTime, fmtNumber, fmtRelative } from './format'
 
@@ -17,6 +18,8 @@ type Props = {
   onQuery: (q: string) => void
   onSource: (s: Source | '') => void
   onPage: (p: number) => void
+  /** Resolves when the signup is deleted; rejects to keep the row. */
+  onDelete: (s: Signup) => Promise<void>
 }
 
 function CopyEmail({ email }: { email: string }) {
@@ -38,7 +41,56 @@ function CopyEmail({ email }: { email: string }) {
   )
 }
 
-function Row({ s }: { s: Signup }) {
+/** Trash button that asks for confirmation in place before deleting. */
+function DeleteSignup({ s, onDelete }: { s: Signup; onDelete: Props['onDelete'] }) {
+  const [state, setState] = useState<'idle' | 'confirm' | 'busy'>('idle')
+
+  if (state === 'idle') {
+    return (
+      <button
+        type="button"
+        className="row-delete"
+        onClick={() => setState('confirm')}
+        aria-label={`Delete ${s.first_name} (${s.email})`}
+        title="Delete signup"
+      >
+        <TrashIcon />
+      </button>
+    )
+  }
+
+  return (
+    <span className="row-confirm" role="group" aria-label={`Confirm deleting ${s.first_name}`}>
+      <span className="row-confirm__q">Delete?</span>
+      <button
+        type="button"
+        className="row-confirm__yes"
+        disabled={state === 'busy'}
+        autoFocus
+        onClick={async () => {
+          setState('busy')
+          try {
+            await onDelete(s)
+          } catch {
+            setState('confirm')
+          }
+        }}
+      >
+        {state === 'busy' ? 'Deleting…' : 'Delete'}
+      </button>
+      <button
+        type="button"
+        className="row-confirm__no"
+        disabled={state === 'busy'}
+        onClick={() => setState('idle')}
+      >
+        Cancel
+      </button>
+    </span>
+  )
+}
+
+function Row({ s, onDelete }: { s: Signup; onDelete: Props['onDelete'] }) {
   return (
     <tr>
       <td data-label="Name">
@@ -63,11 +115,14 @@ function Row({ s }: { s: Signup }) {
           {fmtRelative(s.created_at)}
         </time>
       </td>
+      <td data-label="Actions" className="table__actions">
+        <DeleteSignup s={s} onDelete={onDelete} />
+      </td>
     </tr>
   )
 }
 
-export function SignupsTable({ data, loading, query, source, onQuery, onSource, onPage }: Props) {
+export function SignupsTable({ data, loading, query, source, onQuery, onSource, onPage, onDelete }: Props) {
   const [draft, setDraft] = useState(query)
 
   // debounce typing into the search box
@@ -127,11 +182,14 @@ export function SignupsTable({ data, loading, query, source, onQuery, onSource, 
               <th scope="col">Email</th>
               <th scope="col">Form</th>
               <th scope="col">Joined</th>
+              <th scope="col" className="table__actions">
+                <span className="visually-hidden">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {data?.items.map((s) => (
-              <Row key={s.id} s={s} />
+              <Row key={s.id} s={s} onDelete={onDelete} />
             ))}
           </tbody>
         </table>
